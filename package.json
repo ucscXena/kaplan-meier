@@ -1,0 +1,39 @@
+{
+  "name": "client-template",
+  "version": "1.0.0",
+  "description": "client project template",
+  "main": "index.js",
+  "scripts": {
+    "pretest": "webpack --config webpack.test.js --target node test/all.js",
+    "test": "mocha --timeout 0 build/testBundle",
+    "lint": "eslint --no-color js/*.js test/*.js",
+    "clean": "rimraf build/*",
+    "start": "webpack-dev-server --devtool eval --progress --colors --history-api-fallback",
+    "build": "webpack",
+    "build:prod": "npm run build -- --config webpack.prod.js --devtool source-map",
+    "prebuild": "npm run clean"
+  },
+  "author": "Brian Craft",
+  "devDependencies": {
+    "assert": "^1.3.0",
+    "babel": "^5.1.13",
+    "babel-core": "^5.1.13",
+    "babel-eslint": "^3.0.1",
+    "babel-loader": "^5.0.0",
+    "eslint": "^0.20.0",
+    "jsverify": "^0.7.1",
+    "mocha": "^2.2.1",
+    "mocha-loader": "^0.7.1",
+    "rimraf": "^2.3.2",
+    "tmp": "0.0.28",
+    "html-webpack-plugin": "^1.1.0",
+    "webpack": "^1.5.3",
+    "webpack-dev-server": "^1.7.0"
+  },
+  "dependencies": {
+    "babel-runtime": "^5.1.13",
+    "jStat": "^1.4.3",
+    "linear-algebra": "^3.1.1",
+    "underscore": "^1.7.0"
+  }
+}
