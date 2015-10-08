@@ -185,42 +185,39 @@ function covariance(allGroupsRes, OETable) {
 	return vv;
 }
 
+// This might be the mis-named.
+function solve(a, b) {
+	var bT = transpose(b),
+		aInv = jStat.inv(a);
+	return multiply(multiply(b, aInv), bT);
+}
+
 // allGroupsRes: km of all groups combined?
 // groupedDataTable: [{tte, ev}, ...]
 function logranktest (allGroupsRes, groupedDataTable) {
-	var KMStats,
-		pValue,
+	var pValue = 1,
+		KMStats,
 		dof, // degree of freedom
 		OETable,
-		OMinusEVector, OMinusEVectorMinus1,// O-E and O-E drop the last element
-		vv, vvMinus1; //covariant matrix and covraiance matrix drops the last row and column
+		OMinusEVector, // O-E
+		vv; //covariant matrix
 
+	// Table of observed and expected events, for each group.
 	OETable = groupedDataTable
 				.map(({tte, ev}) => expectedObservedEventNumber(allGroupsRes, tte, ev))
 				.filter(r => r.expected);
 
-	OMinusEVector = map(OETable, r => r.observed - r.expected);
-	// logrank stats covariance matrix vv
-	vv = covariance(allGroupsRes, OETable);
-
-	OMinusEVectorMinus1 = OMinusEVector.slice(1); // Drop one dimension from O-E and variance
-	vvMinus1 = vv.slice(1).map(r => r.slice(1));
+	// Find O-E and covariance, and drop one dimension from each
+	OMinusEVector = OETable.map(r => r.observed - r.expected).slice(1);
+	vv = covariance(allGroupsRes, OETable).slice(1).map(r => r.slice(1)); // drop 1st row & 1st column
 
 	dof = OETable.length - 1;
 
-	var chi = 0;
 	if (dof > 0) {
-		var m = [OMinusEVectorMinus1],
-			mT = transpose(m),
-			vvMinus1Inv = jStat.inv(vvMinus1),
-			mfinal = multiply(multiply(m, vvMinus1Inv), mT);
-
-		KMStats = mfinal[0][0];
-
-		chi = jStat.chisquare.cdf(KMStats, dof);
+		KMStats = solve(vv, [OMinusEVector])[0][0];
+		pValue = 1 - jStat.chisquare.cdf(KMStats, dof);
 	}
 
-	pValue = 1 - chi;
 	return {
 		dof: dof,
 		KMStats: KMStats,
