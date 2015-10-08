@@ -62,21 +62,21 @@ function timeTable(tte, ev) {
 // tte  time to exit (event or censor)
 // ev   is truthy if there is an event.
 function compute(tte, ev) {
-	var dini = timeTable(tte, ev),
+	var dini = timeTable(tte, ev);
 
-		// s : the survival probability from t=0 to the particular time (i.e. the end of the time interval)
-		// rate : the chance of an event happened within the time interval (as in t and the previous t with an event)
-		si = reduce(dini, function (a, dn) { // survival at each t_i (including censor times)
-			var l = last(a) || { s: 1 };
-			if (dn.d) {                      // there were events at this t_i
-				a.push({t: dn.t, e: true, s: l.s * (1 - dn.d / dn.n), n: dn.n, d: dn.d, rate: dn.d / dn.n});
-			} else {                         // only censors
-				a.push({t: dn.t, e: false, s: l.s, n: dn.n, d: dn.d, rate: null});
-			}
-			return a;
-		}, []);
-
-	return si;
+	// s : the survival probability from t=0 to the particular time (i.e. the
+	//     end of the time interval)
+	// rate : the chance of an event happened within the time interval (as in t
+	//     and the previous t with an event)
+	return reduce(dini, function (a, dn) { // survival at each t_i (including censor times)
+		var l = last(a) || { s: 1 };
+		if (dn.d) {                      // there were events at this t_i
+			a.push({t: dn.t, e: true, s: l.s * (1 - dn.d / dn.n), n: dn.n, d: dn.d, rate: dn.d / dn.n});
+		} else {                         // only censors
+			a.push({t: dn.t, e: false, s: l.s, n: dn.n, d: dn.d, rate: null});
+		}
+		return a;
+	}, []);
 }
 
 
