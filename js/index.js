@@ -228,6 +228,7 @@ function logranktest (allGroupsRes, groupedDataTable) {
 		vvMinus1Copy[i] = vvMinus1[i].slice(0, vvMinus1[i].length);
 	}
 
+	var chi = 0;
 	if (dof > 0) {
 		var m = new Matrix([OMinusEVectorMinus1]),
 			mT = new Matrix([OMinusEVectorMinus1]).trans(),
@@ -236,9 +237,10 @@ function logranktest (allGroupsRes, groupedDataTable) {
 
 		KMStats = mfinal.data[0][0];
 
-		pValue = 1 - jStat.chisquare.cdf(KMStats, dof);
+		chi = jStat.chisquare.cdf(KMStats, dof);
 	}
 
+	pValue = 1 - chi;
 	return {
 		dof: dof,
 		KMStats: KMStats,
