@@ -161,6 +161,8 @@ function expectedObservedEventNumber(si, tte, ev) {
 }
 
 
+// allGroupsRes: km of all groups combined?
+// groupedDataTable: [{tte, ev}, ...]
 function logranktest (allGroupsRes, groupedDataTable) {
 	var KMStats,
 		pValue,
