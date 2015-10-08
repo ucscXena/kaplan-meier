@@ -153,31 +153,13 @@ function expectedObservedEventNumber(si, tte, ev) {
 	};
 }
 
-
-// allGroupsRes: km of all groups combined?
-// groupedDataTable: [{tte, ev}, ...]
-function logranktest (allGroupsRes, groupedDataTable) {
-	var KMStats,
-		pValue,
-		dof, // degree of freedom
+function covariance(allGroupsRes, OETable) {
+	var vv = jStat.zeros(OETable.length),
 		i, j, //groups
 		t, //timeIndex
-		OETable,
-		OMinusEVector, OMinusEVectorMinus1,// O-E and O-E drop the last element
-		vv, vvMinus1, //covariant matrix and covraiance matrix drops the last row and column
 		N, //total number of samples
 		Ki, Kj, // at risk number from each group
 		n; //total observed
-
-	OETable = groupedDataTable
-				.map(({tte, ev}) => expectedObservedEventNumber(allGroupsRes, tte, ev))
-				.filter(r => r.expected);
-	OMinusEVector = map(OETable, r => r.observed - r.expected);
-
-	dof = OETable.length - 1;
-
-	// logrank stats covariance matrix vv
-	vv = jStat.zeros(OETable.length);
 
 	for (i = 0; i < OETable.length; i++) {
 		for (j = i; j < OETable.length; j++) {
@@ -189,22 +171,42 @@ function logranktest (allGroupsRes, groupedDataTable) {
 					Kj = OETable[j].dataByTimeTable[t].n;
 					// https://books.google.com/books?id=nPkjIEVY-CsC&pg=PA451&lpg=PA451&dq=multivariate+hypergeometric+distribution+covariance&source=bl&ots=yoieGfA4bu&sig=dhRcSYKcYiqLXBPZWOaqzciViMs&hl=en&sa=X&ved=0CEQQ6AEwBmoVChMIkqbU09SuyAIVgimICh0J3w1x#v=onepage&q=multivariate%20hypergeometric%20distribution%20covariance&f=false
 					// when N==1: only 1 subject, no variance
-					if (i !== j && N !== 1){
+					if (i !== j && N !== 1) {
 						vv[i][j] -= n * Ki * Kj * (N - n) / (N * N * (N - 1));
 						vv[j][i] = vv[i][j];
 					}
-					else {//i==j
-						if (N !== 1) {
-							vv[i][i] += n * Ki * (N - Ki) * (N - n) / (N * N * (N - 1));
-						}
+					else if (N !== 1) {  // i==j
+						vv[i][i] += n * Ki * (N - Ki) * (N - n) / (N * N * (N - 1));
 					}
 				}
 			}
 		}
 	}
+	return vv;
+}
 
-	OMinusEVectorMinus1 = OMinusEVector.slice(1);
+// allGroupsRes: km of all groups combined?
+// groupedDataTable: [{tte, ev}, ...]
+function logranktest (allGroupsRes, groupedDataTable) {
+	var KMStats,
+		pValue,
+		dof, // degree of freedom
+		OETable,
+		OMinusEVector, OMinusEVectorMinus1,// O-E and O-E drop the last element
+		vv, vvMinus1; //covariant matrix and covraiance matrix drops the last row and column
+
+	OETable = groupedDataTable
+				.map(({tte, ev}) => expectedObservedEventNumber(allGroupsRes, tte, ev))
+				.filter(r => r.expected);
+
+	OMinusEVector = map(OETable, r => r.observed - r.expected);
+	// logrank stats covariance matrix vv
+	vv = covariance(allGroupsRes, OETable);
+
+	OMinusEVectorMinus1 = OMinusEVector.slice(1); // Drop one dimension from O-E and variance
 	vvMinus1 = vv.slice(1).map(r => r.slice(1));
+
+	dof = OETable.length - 1;
 
 	var chi = 0;
 	if (dof > 0) {
@@ -225,7 +227,6 @@ function logranktest (allGroupsRes, groupedDataTable) {
 		pValue: pValue
 	};
 }
-
 
 module.exports = {
 	compute: compute,
