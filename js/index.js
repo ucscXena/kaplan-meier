@@ -150,7 +150,7 @@ function expectedObservedEventNumber(si, tte, ev) {
 
 	}, 0);
 
-	observedNumber = filter(ev, x => x === 1).length; //1 is the internal xena converted code for EVENT
+	observedNumber = filter(ev, x => x).length;
 
 	return {
 		expected: expectedNumber,
