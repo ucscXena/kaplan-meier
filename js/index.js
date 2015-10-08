@@ -3,9 +3,7 @@
 
 var _ = require('underscore');
 
-var jStat = require('jStat').jStat,
-	linearAlgebra = require('linear-algebra')(),
-	Matrix = linearAlgebra.Matrix;
+var jStat = require('jStat').jStat;
 
 var reduce = _.reduce,
 	map = _.map,
@@ -16,6 +14,23 @@ var reduce = _.reduce,
 	pluck = _.pluck,
 	filter = _.filter;
 
+// jStat methods annoyingly demote types if they have length one. This makes
+// them fail to compose with other methods.  Here we re-assert the proper types
+// for multiply and transpose.
+function multiply(a, b) {
+	var r = jStat.multiply(a, b);
+	return r.length ? r : [[r]];
+}
+
+function transpose(a) {
+	var r = jStat.transpose(a);
+	return r[0].length ? r : [r];
+}
+
+// Patch for bug, in case we need it. Affects reuse of matrices that
+// are passed to inv, aug, gauss_jordan.
+// https://github.com/jstat/jstat/issues/167
+//jStat.aug = (a, b) => a.map((row, i) => row.concat(b[i]));
 
 // Compute at-risk, exiting, and deaths for each time t_i, from
 // a list of events.
@@ -147,32 +162,22 @@ function logranktest (allGroupsRes, groupedDataTable) {
 		dof, // degree of freedom
 		i, j, //groups
 		t, //timeIndex
-		OETable = [],
-		OMinusEVector = [], OMinusEVectorMinus1,// O-E and O-E drop the last element
-		vv = [], vvMinus1, //covariant matrix and covraiance matrix drops the last row and column
+		OETable,
+		OMinusEVector, OMinusEVectorMinus1,// O-E and O-E drop the last element
+		vv, vvMinus1, //covariant matrix and covraiance matrix drops the last row and column
 		N, //total number of samples
 		Ki, Kj, // at risk number from each group
 		n; //total observed
 
-	_.each(groupedDataTable, function(group) {
-		var r = expectedObservedEventNumber(allGroupsRes, group.tte, group.ev);
-		//console.log(group.name, group.tte.length, r.observed, r.expected,
-
-		if (r.expected) {
-			OETable.push(r);
-			OMinusEVector.push(r.observed - r.expected);
-		}
-	});
+	OETable = groupedDataTable
+				.map(({tte, ev}) => expectedObservedEventNumber(allGroupsRes, tte, ev))
+				.filter(r => r.expected);
+	OMinusEVector = map(OETable, r => r.observed - r.expected);
 
 	dof = OETable.length - 1;
 
 	// logrank stats covariance matrix vv
-	for (i = 0; i < OETable.length; i++) {
-		vv.push([]);
-		for (j = 0; j < OETable.length; j++) {
-			vv[i].push(0);
-		}
-	}
+	vv = jStat.zeros(OETable.length);
 
 	for (i = 0; i < OETable.length; i++) {
 		for (j = i; j < OETable.length; j++) {
@@ -198,24 +203,17 @@ function logranktest (allGroupsRes, groupedDataTable) {
 		}
 	}
 
-	OMinusEVectorMinus1 = OMinusEVector.slice(0, OMinusEVector.length - 1);
-	vvMinus1 = vv.slice(0, vv.length - 1);
-	for (i = 0; i < vvMinus1.length; i++) {
-		vvMinus1[i] = vvMinus1[i].slice(0, vvMinus1[i].length - 1);
-	}
-	var vvMinus1Copy = vvMinus1.slice(0, vvMinus1.length);
-	for(i = 0; i < vvMinus1.length; i++) {
-		vvMinus1Copy[i] = vvMinus1[i].slice(0, vvMinus1[i].length);
-	}
+	OMinusEVectorMinus1 = OMinusEVector.slice(1);
+	vvMinus1 = vv.slice(1).map(r => r.slice(1));
 
 	var chi = 0;
 	if (dof > 0) {
-		var m = new Matrix([OMinusEVectorMinus1]),
-			mT = new Matrix([OMinusEVectorMinus1]).trans(),
-				vvMinus1Inv = new Matrix(jStat.inv(vvMinus1Copy)),
-				mfinal = m.dot(vvMinus1Inv).dot(mT);
+		var m = [OMinusEVectorMinus1],
+			mT = transpose(m),
+			vvMinus1Inv = jStat.inv(vvMinus1),
+			mfinal = multiply(multiply(m, vvMinus1Inv), mT);
 
-		KMStats = mfinal.data[0][0];
+		KMStats = mfinal[0][0];
 
 		chi = jStat.chisquare.cdf(KMStats, dof);
 	}
