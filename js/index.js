@@ -122,22 +122,10 @@ function expectedObservedEventNumber(si, tte, ev) {
 		observedNumber,
 		dataByTimeTable = [];
 
-	si = si.filter(function(item) {  //only keep the curve where there is an event
-		if (item.e) {return true; }
-		else {return false; }
-	});
+	si = si.filter(item => item.e);
 
 	expectedNumber = reduce(si, function (memo, item) {
-		var pointerInData = _.find(data, function (x) {
-			if (x.t === item.t) {
-				return true;
-			}
-			if (x.t > item.t) {
-				return true;
-			}
-			return false;
-		});
-
+		var pointerInData = _.find(data, x => x.t >= item.t);
 
 		if (pointerInData) {
 			var expected = pointerInData.n * item.rate;
