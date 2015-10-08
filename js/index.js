@@ -27,13 +27,13 @@ function pluckTte(x) {
 // tte  time to exit (event or censor)
 // ev   is truthy if there is an event.
 function compute(tte, ev) {
-	var exits = sortBy(map(tte, function (x, i) { return { tte: x, ev: ev[i] }; }), 'tte'), // sort and collate
-		uexits = uniq(pluckTte(exits), true),                    // unique tte
-		gexits = groupBy(exits, function (x) { return x.tte; }),  // group by common time of exit
-		dini = reduce(uexits, function (a, tte) {                 // compute d_i, n_i for times t_i (including censor times)
+	var exits = sortBy(map(tte, (x, i) => ({tte: x, ev: ev[i]})), 'tte'), // sort and collate
+		uexits = uniq(pluck(exits, 'tte'), true),                // unique tte
+		gexits = groupBy(exits, x => x.tte),                     // group by common time of exit
+		dini = reduce(uexits, function (a, tte) {                // compute d_i, n_i for times t_i (including censor times)
 			var group = gexits[tte],
 			l = last(a) || {n: exits.length, e: 0},
-			events = filter(group, function (x) { return x.ev; });
+			events = filter(group, x => x.ev);
 
 			a.push({
 				n: l.n - l.e,     // at risk
@@ -50,7 +50,7 @@ function compute(tte, ev) {
 			var l = last(a) || { s: 1 };
 			if (dn.d) {                      // there were events at this t_i
 				a.push({t: dn.t, e: true, s: l.s * (1 - dn.d / dn.n), n: dn.n, d: dn.d, rate: dn.d / dn.n});
-			} else {                          // only censors
+			} else {                         // only censors
 				a.push({t: dn.t, e: false, s: l.s, n: dn.n, d: dn.d, rate: null});
 			}
 			return a;
