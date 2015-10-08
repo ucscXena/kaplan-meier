@@ -17,8 +17,28 @@ var reduce = _.reduce,
 	filter = _.filter;
 
 
-function pluckTte(x) {
-	return pluck(x, 'tte');
+// Compute at-risk, exiting, and deaths for each time t_i, from
+// a list of events.
+// tte: [number, ...]
+// ev:  [boolean, ...]
+// returns: [{n, e, d, t}, ...]
+function timeTable(tte, ev) {
+	var exits = sortBy(map(tte, (x, i) => ({tte: x, ev: ev[i]})), 'tte'), // sort and collate
+		uexits = uniq(pluck(exits, 'tte'), true),                // unique tte
+		gexits = groupBy(exits, x => x.tte);                     // group by common time of exit
+	return reduce(uexits, function (a, tte) {                // compute d_i, n_i for times t_i (including censor times)
+		var group = gexits[tte],
+		l = last(a) || {n: exits.length, e: 0},
+		events = filter(group, x => x.ev);
+
+		a.push({
+			n: l.n - l.e,     // at risk
+			e: group.length,  // number exiting
+			d: events.length, // number events (death)
+			t: group[0].tte   // time
+		});
+		return a;
+	}, []);
 }
 
 // kaplan-meier
@@ -27,22 +47,7 @@ function pluckTte(x) {
 // tte  time to exit (event or censor)
 // ev   is truthy if there is an event.
 function compute(tte, ev) {
-	var exits = sortBy(map(tte, (x, i) => ({tte: x, ev: ev[i]})), 'tte'), // sort and collate
-		uexits = uniq(pluck(exits, 'tte'), true),                // unique tte
-		gexits = groupBy(exits, x => x.tte),                     // group by common time of exit
-		dini = reduce(uexits, function (a, tte) {                // compute d_i, n_i for times t_i (including censor times)
-			var group = gexits[tte],
-			l = last(a) || {n: exits.length, e: 0},
-			events = filter(group, x => x.ev);
-
-			a.push({
-				n: l.n - l.e,     // at risk
-				e: group.length,  // number exiting
-				d: events.length, // number events (death)
-				t: group[0].tte   // time
-			});
-			return a;
-		}, []),
+	var dini = timeTable(tte, ev),
 
 		// s : the survival probability from t=0 to the particular time (i.e. the end of the time interval)
 		// rate : the chance of an event happened within the time interval (as in t and the previous t with an event)
@@ -102,22 +107,7 @@ function compute(tte, ev) {
 // report observed n events, expected n events. pearson's chi-square component (O-E)^2/E
 
 function expectedObservedEventNumber(si, tte, ev) {
-	var exits = sortBy(map(tte, (x, i) => ({tte: x, ev: ev[i]})), 'tte'), // sort and collate
-		uexits = uniq(pluckTte(exits), true),                    // unique tte
-		gexits = groupBy(exits, x => x.tte),  // group by common time of exit
-		data = reduce(uexits, function (a, tte) {                 // sorted by time stats from the input data as in tte,ev
-			var group = gexits[tte],
-			l = last(a) || {n: exits.length, e: 0},
-			events = filter(group, x => x.ev);
-
-			a.push({
-				n: l.n - l.e,     // at risk
-				e: group.length,  // number exiting
-				d: events.length, // number events (death)
-				t: group[0].tte   // time
-			});
-			return a;
-		}, []),
+	var data = timeTable(tte, ev),
 		expectedNumber,
 		observedNumber,
 		dataByTimeTable = [];
