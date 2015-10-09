@@ -2,6 +2,10 @@
 
 Basic Kaplan-Meier methods, ported to javascript.
 
+## Dependencies
+
+We assume you're using an es5 shim for array methods.
+
 ## Build
 The build is based on npm and webpack.
  * Ensure that git and node are installed
