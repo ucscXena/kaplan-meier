@@ -123,7 +123,7 @@ describe('kaplan-meier', function () {
 		});
 	});
 
-	describe.only('#logranktest', function () {
+	describe('#logranktest', function () {
 		property('should match R.survival',
 			// This construction ensures we have at least 2 groups. nearray
 			// enforces that the groups are not empty.
