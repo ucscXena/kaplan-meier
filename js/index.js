@@ -1,15 +1,13 @@
 /*global require: false, module: false */
 'use strict';
 
-var _ = require('underscore');
-
 var jStat = require('jStat').jStat;
-
-var groupBy = _.groupBy,
-	sortBy = _.sortBy,
-	last = _.last,
-	uniq = _.uniq,
-	pluck = _.pluck;
+var pluck,
+	uniq,
+	sortBy,
+	groupBy,
+	last,
+	find;
 
 // jStat methods annoyingly demote types if they have length one. This makes
 // them fail to compose with other methods.  Here we re-assert the proper types
@@ -127,7 +125,7 @@ function expectedObservedEventNumber(si, tte, ev) {
 	si = si.filter(item => item.e);
 
 	expectedNumber = si.reduce(function (memo, item) {
-		var pointerInData = _.find(data, x => x.t >= item.t);
+		var pointerInData = find(data, x => x.t >= item.t);
 
 		if (pointerInData) {
 			var expected = pointerInData.n * item.rate;
@@ -229,8 +227,19 @@ function logranktest (groupedDataTable) {
 	};
 }
 
-module.exports = {
+var exports = {
+	init: obj => {
+		pluck = obj.pluck;
+		uniq = obj.uniq;
+		sortBy = obj.sortBy;
+		groupBy = obj.groupBy;
+		last = obj.last;
+		find = obj.find;
+		return exports; // return the module for convenience of the caller
+	},
 	compute: compute,
 	expectedObservedEventNumber: expectedObservedEventNumber,
 	logranktest: logranktest
 };
+
+module.exports = exports;

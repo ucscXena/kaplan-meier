@@ -11,7 +11,7 @@ var jscOpts = {
 };
 var cp = require('child_process');
 
-var km = require('../js/index');
+var km = require('../js/index').init(_);
 
 function property(name, prop, fn) {
 	it(name, function () {
