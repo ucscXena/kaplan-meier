@@ -6,6 +6,9 @@ Basic Kaplan-Meier methods, ported to javascript.
 
 We assume you're using an es5 shim for array methods.
 
+A helper library such as underscore/lodash/ramda is required, and
+should be passed to the init() method.
+
 ## Build
 The build is based on npm and webpack.
  * Ensure that git and node are installed

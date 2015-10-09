@@ -18,7 +18,6 @@ module.exports = {
 		]
 	},
 	resolve: {
-		extensions: ['', '.js'],
-		root: __dirname + "/js"
+		extensions: ['', '.js']
 	}
 };
