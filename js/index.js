@@ -5,14 +5,11 @@ var _ = require('underscore');
 
 var jStat = require('jStat').jStat;
 
-var reduce = _.reduce,
-	map = _.map,
-	groupBy = _.groupBy,
+var groupBy = _.groupBy,
 	sortBy = _.sortBy,
 	last = _.last,
 	uniq = _.uniq,
-	pluck = _.pluck,
-	filter = _.filter;
+	pluck = _.pluck;
 
 // jStat methods annoyingly demote types if they have length one. This makes
 // them fail to compose with other methods.  Here we re-assert the proper types
@@ -38,13 +35,13 @@ function transpose(a) {
 // ev:  [boolean, ...]
 // returns: [{n, e, d, t}, ...]
 function timeTable(tte, ev) {
-	var exits = sortBy(map(tte, (x, i) => ({tte: x, ev: ev[i]})), 'tte'), // sort and collate
+	var exits = sortBy(tte.map((x, i) => ({tte: x, ev: ev[i]})), 'tte'), // sort and collate
 		uexits = uniq(pluck(exits, 'tte'), true),                // unique tte
 		gexits = groupBy(exits, x => x.tte);                     // group by common time of exit
-	return reduce(uexits, function (a, tte) {                // compute d_i, n_i for times t_i (including censor times)
+	return uexits.reduce(function (a, tte) {                // compute d_i, n_i for times t_i (including censor times)
 		var group = gexits[tte],
 		l = last(a) || {n: exits.length, e: 0},
-		events = filter(group, x => x.ev);
+		events = group.filter(x => x.ev);
 
 		a.push({
 			n: l.n - l.e,     // at risk
@@ -68,7 +65,7 @@ function compute(tte, ev) {
 	//     end of the time interval)
 	// rate : the chance of an event happened within the time interval (as in t
 	//     and the previous t with an event)
-	return reduce(dini, function (a, dn) { // survival at each t_i (including censor times)
+	return dini.reduce(function (a, dn) { // survival at each t_i (including censor times)
 		var l = last(a) || { s: 1 };
 		if (dn.d) {                      // there were events at this t_i
 			a.push({t: dn.t, e: true, s: l.s * (1 - dn.d / dn.n), n: dn.n, d: dn.d, rate: dn.d / dn.n});
@@ -129,7 +126,7 @@ function expectedObservedEventNumber(si, tte, ev) {
 
 	si = si.filter(item => item.e);
 
-	expectedNumber = reduce(si, function (memo, item) {
+	expectedNumber = si.reduce(function (memo, item) {
 		var pointerInData = _.find(data, x => x.t >= item.t);
 
 		if (pointerInData) {
@@ -143,7 +140,7 @@ function expectedObservedEventNumber(si, tte, ev) {
 
 	}, 0);
 
-	observedNumber = filter(ev, x => x).length;
+	observedNumber = ev.filter(x => x).length;
 
 	return {
 		expected: expectedNumber,
