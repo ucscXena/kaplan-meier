@@ -123,7 +123,7 @@ describe('kaplan-meier', function () {
 		});
 	});
 
-	describe('#logranktest', function () {
+	describe.only('#logranktest', function () {
 		property('should match R.survival',
 			// This construction ensures we have at least 2 groups. nearray
 			// enforces that the groups are not empty.
@@ -131,9 +131,7 @@ describe('kaplan-meier', function () {
 			function ([group0, groupsN]) {
 				var groups = [group0].concat(groupsN),
 					groupTable = groups.map(subjectsToTimes),
-					all = subjectsToTimes(_.flatten(groups, true)),
-					allKm = km.compute(all.tte, all.ev).filter(t => t.e),
-					logrank = km.logranktest(allKm, groupTable),
+					logrank = km.logranktest(groupTable),
 					Rlogrank = NaN;
 
 				try {

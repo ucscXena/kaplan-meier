@@ -192,10 +192,17 @@ function solve(a, b) {
 	return multiply(multiply(b, aInv), bT);
 }
 
+function allGroupsKm(groups) {
+	var tte = Array.concat.apply([], pluck(groups, 'tte')),
+		ev = Array.concat.apply([], pluck(groups, 'ev'));
+	return compute(tte, ev).filter(t => t.e);
+}
+
 // allGroupsRes: km of all groups combined?
 // groupedDataTable: [{tte, ev}, ...]
-function logranktest (allGroupsRes, groupedDataTable) {
-	var pValue = 1,
+function logranktest (groupedDataTable) {
+	var allGroupsRes = allGroupsKm(groupedDataTable),
+		pValue = 1,
 		KMStats,
 		dof, // degree of freedom
 		OETable,
