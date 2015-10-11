@@ -1,7 +1,7 @@
 {
-  "name": "client-template",
+  "name": "kaplan-meier",
   "version": "1.0.0",
-  "description": "client project template",
+  "description": "Basic kaplan-meier methods",
   "main": "index.js",
   "scripts": {
     "pretest": "webpack --config webpack.test.js --target node test/all.js",
