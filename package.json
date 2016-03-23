@@ -15,6 +15,10 @@
     "prebuild": "npm run clean"
   },
   "author": "Brian Craft",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ucscXena/kaplan-meier"
+  },
   "devDependencies": {
     "assert": "^1.3.0",
     "babel": "^5.1.13",
@@ -35,5 +39,14 @@
     "babel-runtime": "^5.1.13",
     "jStat": "^1.4.3",
     "underscore": "^1.7.0"
-  }
+  },
+  "keywords": [
+    "bioinformatics",
+    "survival",
+    "statistics",
+    "stats",
+    "kaplan-meier",
+    "genomics",
+    "biojs"
+  ]
 }
