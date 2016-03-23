@@ -11,6 +11,7 @@
     "start": "webpack-dev-server --devtool eval --progress --colors --history-api-fallback",
     "build": "webpack",
     "build:prod": "npm run build -- --config webpack.prod.js --devtool source-map",
+    "prepublish": "babel js -d dist",
     "prebuild": "npm run clean"
   },
   "author": "Brian Craft",
