@@ -14,6 +14,7 @@
     "prepublish": "babel js -d dist",
     "prebuild": "npm run clean"
   },
+  "license": "Apache-2.0",
   "author": "Brian Craft",
   "repository": {
     "type": "git",
