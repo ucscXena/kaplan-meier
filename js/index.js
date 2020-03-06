@@ -229,7 +229,7 @@ function logranktest (groupedDataTable) {
 
 var exports = {
 	init: obj => {
-		pluck = obj.pluck;
+		pluck = obj.pluck || obj.map;
 		uniq = obj.uniq;
 		sortBy = obj.sortBy;
 		groupBy = obj.groupBy;
