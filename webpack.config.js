@@ -17,6 +17,7 @@ module.exports = {
 			{ test: /\.js$/, exclude: /node_modules/, loader: 'babel-loader?optional=runtime,cacheDirectory=true'}
 		]
 	},
+	plugins: [],
 	resolve: {
 		extensions: ['', '.js']
 	}
