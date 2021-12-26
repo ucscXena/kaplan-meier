@@ -1,7 +1,7 @@
 /*global require: false, module: false */
 'use strict';
 
-var jStat = require('jStat').jStat;
+var { jStat } = require('jstat');
 var pluck,
 	uniq,
 	sortBy,
