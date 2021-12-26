@@ -8,7 +8,7 @@ config.output = {
 };
 
 config.externals = [
-	'jStat'
+	'jstat'
 ];
 
 module.exports = config;
