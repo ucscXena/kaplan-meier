@@ -188,8 +188,8 @@ function solve(a, b) {
 }
 
 function allGroupsKm(groups) {
-	var tte = Array.concat.apply([], pluck(groups, 'tte')),
-		ev = Array.concat.apply([], pluck(groups, 'ev'));
+	const tte = [].concat.apply([], pluck(groups, 'tte'));
+	const ev = [].concat.apply([], pluck(groups, 'ev'));
 	return compute(tte, ev).filter(t => t.e);
 }
 
