@@ -1,22 +1,33 @@
 /*global require: false, module: false, __dirname: false */
 'use strict';
-//var HtmlWebpackPlugin = require('html-webpack-plugin');
-//var webpack = require('webpack');
+
+const path = require('path');
 
 module.exports = {
-	historyApiFallback: true,
+	//historyApiFallback: true,
+	mode: 'production',
 	entry: "./js/index",
 	output: {
-		path: "build",
+		path: path.join(__dirname, "build"),
 		publicPath: "/",
 		filename: "[name].js"
 	},
 	module: {
-		loaders: [
-			// es7.objectRestSpread failing???
-			{ test: /\.js$/, exclude: /node_modules/, loader: 'babel-loader?optional=runtime,cacheDirectory=true'}
+		rules: [
+			{
+				test: /\.js$/,
+				exclude: /node_modules/,
+				use: {
+					loader: 'babel-loader',
+					options: {
+						presets: ['@babel/preset-env'],
+						cacheDirectory: true
+					}
+				}
+			}
 		]
 	},
+	plugins: [],
 	resolve: {
 		extensions: ['', '.js']
 	}
