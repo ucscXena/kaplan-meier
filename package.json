@@ -38,7 +38,7 @@
   "dependencies": {
     "@babel/runtime": "^7.16.5",
     "jStat": "^1.4.3",
-    "underscore": "^1.7.0"
+    "underscore": "^1.13.2"
   },
   "keywords": [
     "bioinformatics",
